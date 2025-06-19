@@ -56,7 +56,21 @@ with st.sidebar:
     export = st.checkbox("📤 Enable CSV Export")
 
 # --- Load & Prepare ---
-df = load_and_clean_data("data/data.csv")
+st.subheader("📁 Upload Your Online Retail CSV")
+
+uploaded_file = st.file_uploader("Choose a CSV file", type=["csv"])
+
+if uploaded_file is not None:
+    try:
+        df = pd.read_csv(uploaded_file, encoding="latin-1")
+        df = load_and_clean_data(df)
+    except Exception as e:
+        st.error(f"⚠️ Error reading file: {e}")
+        st.stop()
+else:
+    st.warning("👈 Please upload a CSV file to continue.")
+    st.stop()
+
 rfm = generate_rfm_table(df)
 
 # --- Clustering ---

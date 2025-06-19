@@ -1,15 +1,15 @@
 import pandas as pd
 
-def load_and_clean_data(file_path: str) -> pd.DataFrame:
-    
-    df = pd.read_csv(file_path, encoding='latin-1')
+def load_and_clean_data(data):
+    # If path provided, load CSV
+    if isinstance(data, str):
+        df = pd.read_csv(data, encoding="latin-1")
+    else:
+        df = data.copy()
 
-    df = df.dropna(subset=['CustomerID']).copy()
-
-    df = df[~df['InvoiceNo'].str.contains('C', na=False)].copy()
-
-    df['TotalPrice'] = df['Quantity'] * df['UnitPrice']
-
+    df.dropna(subset=['CustomerID'], inplace=True)
+    df = df[df['Quantity'] > 0]
+    df = df[df['UnitPrice'] > 0]
     df['InvoiceDate'] = pd.to_datetime(df['InvoiceDate'])
-
-    return df  # type: ignore
+    df['TotalPrice'] = df['Quantity'] * df['UnitPrice']
+    return df
