@@ -1,37 +1,55 @@
+import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
 from sklearn.decomposition import PCA
+import plotly.express as px
+import plotly.graph_objects as go
+import numpy as np
 
 def plot_rfm_clusters(rfm_clustered: pd.DataFrame):
-
     features = ['Recency', 'Frequency', 'Monetary']
     rfm_copy = rfm_clustered.copy()
 
-    # Apply PCA
+    # PCA projection
     pca = PCA(n_components=2)
     components = pca.fit_transform(rfm_copy[features])
     rfm_copy['PCA1'] = components[:, 0]
     rfm_copy['PCA2'] = components[:, 1]
 
-    # Scatter plot
-    plt.figure(figsize=(10, 6))
-    sns.scatterplot(data=rfm_copy, x='PCA1', y='PCA2', hue='Cluster', palette='Set2', s=80, alpha=0.8)
-    plt.title("Customer Segments (PCA Projection)")
-    plt.xlabel("PCA 1")
-    plt.ylabel("PCA 2")
-    plt.legend(title="Cluster")
-    plt.tight_layout()
-    plt.show()
+    fig = px.scatter(
+        rfm_copy,
+        x='PCA1',
+        y='PCA2',
+        color='Segment',
+        hover_data=['CustomerID', 'Recency', 'Frequency', 'Monetary'],
+        title="📈 Customer Segments (PCA Projection)"
+    )
+    st.plotly_chart(fig, use_container_width=True)
 
 def plot_cluster_profiles(rfm_clustered: pd.DataFrame):
     """
-    Plots a heatmap showing average RFM values for each cluster.
-
-    Args:
-        rfm_clustered (pd.DataFrame): DataFrame with RFM columns and 'Cluster'.
+    Plots a log-scaled heatmap showing average RFM values per customer segment.
     """
-    profile = rfm_clustered.groupby('Cluster')[['Recency', 'Frequency', 'Monetary']].mean()
-    sns.heatmap(profile, annot=True, fmt=".1f", cmap="YlGnBu")
-    plt.title("Cluster Profile Heatmap")
-    plt.show()
+    profile = rfm_clustered.groupby('Segment')[['Recency', 'Frequency', 'Monetary']].mean()
+    
+    # Apply log transformation
+    profile_log = profile.applymap(lambda x: np.log1p(x)).round(2)
+
+    fig = go.Figure(
+        data=go.Heatmap(
+            z=profile_log.values,
+            x=profile_log.columns.tolist(),
+            y=profile_log.index.tolist(),
+            colorscale='YlGnBu',
+            colorbar=dict(title="Log Value"),
+            hovertemplate='Segment: %{y}<br>Metric: %{x}<br>Log Value: %{z}<extra></extra>'
+        )
+    )
+
+    fig.update_layout(
+        title="📉 Log-Scaled Average RFM Values by Segment",
+        xaxis_title="RFM Feature",
+        yaxis_title="Segment",
+        height=400
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
