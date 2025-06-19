@@ -41,8 +41,7 @@ Segment customers based on their purchasing behavior using **RFM analysis** and 
 
 ## 🚀 Live App
 
-🔗 **[Try the Live App on Streamlit Cloud](https://customer-segmentation-dashboard.streamlit.app)**  
-_(You’ll need to deploy this yourself — see instructions below)_
+🔗 **[Try the Live App on Streamlit Cloud]([https://customer-segmentation-dashboard.streamlit.app](https://customersegmentation-ryatoaz4q8wr9taxjchewh.streamlit.app))**  
 
 ---
 
