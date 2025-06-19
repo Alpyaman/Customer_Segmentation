@@ -60,16 +60,25 @@ st.subheader("📁 Upload Your Online Retail CSV")
 
 uploaded_file = st.file_uploader("Choose a CSV file", type=["csv"])
 
+required_cols = {"InvoiceNo", "CustomerID", "InvoiceDate", "Quantity", "UnitPrice"}
+
 if uploaded_file is not None:
     try:
         df = pd.read_csv(uploaded_file, encoding="latin-1")
+        
+        if not required_cols.issubset(df.columns):
+            st.error(f"⚠️ Uploaded file is missing required columns:\n\nRequired: {sorted(required_cols)}\n\nFound: {sorted(df.columns)}")
+            st.stop()
+
         df = load_and_clean_data(df)
+
     except Exception as e:
-        st.error(f"⚠️ Error reading file: {e}")
+        st.error(f"❌ Error reading file: {e}")
         st.stop()
 else:
     st.warning("👈 Please upload a CSV file to continue.")
     st.stop()
+
 
 rfm = generate_rfm_table(df)
 
